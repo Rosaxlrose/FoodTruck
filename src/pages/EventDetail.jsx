@@ -36,12 +36,14 @@ export default function EventDetail() {
       const { data: trucksData, error: trucksError } = await supabase
         .from('event_trucks')
         .select(`
+          status,
           trucks (
             id,
             name,
             description,
             image_url,
-            owner_id
+            cuisine_type,
+            price_range
           )
         `)
         .eq('event_id', id)
@@ -49,10 +51,10 @@ export default function EventDetail() {
       if (trucksError) throw trucksError
 
       setEvent(eventData)
-      setRegisteredTrucks(trucksData.map(t => t.trucks))
+      setRegisteredTrucks(trucksData)
+      setLoading(false)
     } catch (error) {
-      alert(error.message)
-    } finally {
+      console.error('Error:', error)
       setLoading(false)
     }
   }
@@ -165,7 +167,7 @@ export default function EventDetail() {
   }
 
   const isOrganizer = user?.id === event.organizer_id
-  const isTruckRegistered = registeredTrucks.some(truck => truck.owner_id === user?.id)
+  const isTruckRegistered = registeredTrucks.some(registration => registration.trucks.owner_id === user?.id)
   const isEventFull = registeredTrucks.length >= event.max_trucks
 
   return (
@@ -254,20 +256,33 @@ export default function EventDetail() {
 
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">ร้านค้าที่เข้าร่วม</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {registeredTrucks.map((truck) => (
-              <div
-                key={truck.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden"
-              >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {registeredTrucks.map((registration) => (
+              <div key={registration.trucks.id} className="bg-white rounded-lg shadow-md overflow-hidden">
                 <img
-                  src={truck.image_url || 'https://via.placeholder.com/300x200'}
-                  alt={truck.name}
-                  className="w-full h-40 object-cover"
+                  src={registration.trucks.image_url}
+                  alt={registration.trucks.name}
+                  className="w-full h-48 object-cover"
                 />
                 <div className="p-4">
-                  <h3 className="font-semibold text-lg mb-2">{truck.name}</h3>
-                  <p className="text-gray-600 text-sm">{truck.description}</p>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold text-lg">{registration.trucks.name}</h3>
+                    <span className={`px-2 py-1 rounded text-sm ${
+                      registration.status === 'approved' ? 'bg-green-100 text-green-800' :
+                      registration.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {registration.status === 'approved' ? 'ยืนยันแล้ว' :
+                       registration.status === 'pending' ? 'รอการยืนยัน' :
+                       'ปฏิเสธ'}
+                    </span>
+                  </div>
+                  <p className="text-gray-600 mb-2 line-clamp-2">{registration.trucks.description}</p>
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <span>{registration.trucks.cuisine_type}</span>
+                    <span>•</span>
+                    <span>{registration.trucks.price_range}</span>
+                  </div>
                 </div>
               </div>
             ))}

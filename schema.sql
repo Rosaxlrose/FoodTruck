@@ -113,17 +113,35 @@ create policy "Users can update own reviews" on reviews
 create policy "Users can delete own reviews" on reviews
   for delete using (auth.uid() = user_id);
 
--- Event trucks table
-create table event_trucks (
-  id uuid default uuid_generate_v4() primary key,
-  event_id uuid references events(id) on delete cascade not null,
-  truck_id uuid references trucks(id) on delete cascade not null,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  unique(event_id, truck_id)
+-- Table: event_trucks
+CREATE TABLE event_trucks (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  event_id UUID REFERENCES events(id) ON DELETE CASCADE,
+  truck_id UUID REFERENCES trucks(id) ON DELETE CASCADE,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(event_id, truck_id)
 );
 
 -- RLS Policies for event_trucks
-alter table event_trucks enable row level security;
-create policy "Event trucks are viewable by everyone." on event_trucks for select using (true);
-create policy "Truck owners can register for events." on event_trucks for insert with check (auth.uid() in (select owner_id from trucks where id = truck_id));
-create policy "Event organizers can remove trucks." on event_trucks for delete using (auth.uid() in (select organizer_id from events where id = event_id));
+ALTER TABLE event_trucks ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can view event_trucks"
+  ON event_trucks FOR SELECT
+  USING (true);
+
+CREATE POLICY "Event owners can manage event_trucks"
+  ON event_trucks FOR ALL
+  USING (
+    auth.uid() IN (
+      SELECT organizer_id FROM events WHERE id = event_id
+    )
+  );
+
+CREATE POLICY "Truck owners can manage their participation"
+  ON event_trucks FOR UPDATE
+  USING (
+    auth.uid() IN (
+      SELECT owner_id FROM trucks WHERE id = truck_id
+    )
+  );

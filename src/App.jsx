@@ -16,6 +16,7 @@ const Events = lazy(() => import('./pages/Events'))
 const CreateEvent = lazy(() => import('./pages/CreateEvent'))
 const EventDetail = lazy(() => import('./pages/EventDetail'))
 const TruckDetail = lazy(() => import('./pages/TruckDetail'))
+const Trucks = lazy(() => import('./pages/Trucks'))
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
                 <Route path="/events" element={<Events />} />
                 <Route path="/events/create" element={<CreateEvent />} />
                 <Route path="/events/:id" element={<EventDetail />} />
+                <Route path="/trucks" element={<Trucks />} />
                 <Route path="/trucks/:id" element={<TruckDetail />} />
               </Routes>
             </Suspense>

@@ -46,6 +46,9 @@ const Navigation = () => {
             <Link to="/events" className="text-gray-600 hover:text-primary">
               อีเวนต์
             </Link>
+            <Link to="/trucks" className="text-gray-600 hover:text-primary">
+              ร้านค้า
+            </Link>
             {user ? (
               <>
                 <Link to="/profile" className="flex items-center gap-2 text-gray-600 hover:text-primary">
@@ -97,6 +100,13 @@ const Navigation = () => {
               onClick={() => setIsMenuOpen(false)}
             >
               อีเวนต์
+            </Link>
+            <Link
+              to="/trucks"
+              className="block text-gray-600 hover:text-primary"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              ร้านค้า
             </Link>
             {user ? (
               <>

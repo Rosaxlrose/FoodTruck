@@ -96,8 +96,17 @@ export default function Trucks() {
 
   function getOpeningHours(hours) {
     if (!hours) return null
-    const today = new Date().toLocaleDateString('en-US', { weekday: 'lowercase' })
-    return hours[today]
+    const daysMap = {
+      'Sunday': 'sunday',
+      'Monday': 'monday',
+      'Tuesday': 'tuesday',
+      'Wednesday': 'wednesday',
+      'Thursday': 'thursday',
+      'Friday': 'friday',
+      'Saturday': 'saturday'
+    }
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' })
+    return hours[daysMap[today]]
   }
 
   // Get unique values for filters
